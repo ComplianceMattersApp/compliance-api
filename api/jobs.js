@@ -1,6 +1,6 @@
 import { withCors } from '../lib/cors';
 
-// In-memory demo data (resets on redeploy)
+// Mock data (resets on deploy). We'll swap for a DB later.
 let jobs = [
   { id: 124, customerId: 1, addressId: 101, title: 'AC Repair',     status: 'Completed',     tech: 'Gigi C.', createdAt: '2025-07-10T09:35:00Z', notes: 'Blower replaced' },
   { id: 130, customerId: 1, addressId: 103, title: 'No Cooling',     status: 'Awaiting Part', tech: 'Luis M.', createdAt: '2025-07-29T10:00:00Z', notes: 'Fan board on order' },
@@ -48,4 +48,5 @@ function handler(req, res) {
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
 export default withCors(handler);
