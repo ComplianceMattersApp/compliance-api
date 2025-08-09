@@ -1,10 +1,10 @@
 import { withCors } from '../../lib/cors';
 
-// Mock customers (linked to your existing mock jobs)
+// --- mock data ---
 let customers = [
   {
     id: 1,
-    type: 'landlord',            // 'homeowner' | 'business' | 'tenant' | 'landlord' | 'property_manager'
+    type: 'landlord',
     name: 'Bob Johnson',
     phone: '(209) 555-3322',
     email: 'bob.j@gmail.com',
@@ -31,30 +31,9 @@ let customers = [
         notes: 'Call ahead. Two dogs on site.'
       }
     ]
-  },
-  {
-    id: 2,
-    type: 'business',
-    name: 'Acme Storage – Pacific Ave',
-    phone: '(209) 555-4400',
-    email: 'mgr@acmestorage.com',
-    notes: 'Commercial client, prefers email.',
-    addresses: [
-      {
-        id: 201,
-        label: 'Site A',
-        street: '4558 Pacific Ave',
-        city: 'Stockton',
-        state: 'CA',
-        zip: '95207',
-        sitePoc: { name: 'Shift Lead', phone: '(209) 555-4401', email: 'floor@acmestorage.com' },
-        notes: 'Access 9–5 weekdays'
-      }
-    ]
   }
 ];
 
-// simple id helpers for mock mode
 function nextCustomerId() {
   return customers.reduce((m, c) => Math.max(m, c.id), 0) + 1;
 }
@@ -65,16 +44,13 @@ function nextAddressId() {
 
 function handler(req, res) {
   if (req.method === 'GET') {
-    // Return list (you can trim fields later if you want)
     return res.status(200).json({ customers });
   }
 
   if (req.method === 'POST') {
-    // Minimal create: name + type required; optional phone/email/addresses
     const { type, name, phone = '', email = '', notes = '', addresses = [] } = req.body || {};
-    if (!type || !name) {
-      return res.status(400).json({ error: 'type and name are required' });
-    }
+    if (!type || !name) return res.status(400).json({ error: 'type and name are required' });
+
     const preparedAddresses = (addresses || []).map(a => ({
       id: nextAddressId(),
       label: a.label || '',
@@ -104,4 +80,4 @@ function handler(req, res) {
 }
 
 export default withCors(handler);
-export { customers, nextAddressId }; // exported so [id].js can reuse
+export { customers, nextAddressId };
