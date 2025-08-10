@@ -44,6 +44,10 @@ function nextAddressId() {
 
 function handler(req, res) {
   if (req.method === 'GET') {
+    if (req.method === 'GET') {
+  return res.status(200).json({ customers, supportsPost: true });
+}
+
     return res.status(200).json({ customers });
   }
 
