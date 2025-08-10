@@ -1,6 +1,6 @@
 import { withCors } from '../../lib/cors';
 
-// --- mock data ---
+// --- in-memory mock data (module scope so it persists across calls) ---
 let customers = [
   {
     id: 1,
@@ -42,18 +42,18 @@ function nextAddressId() {
   return all.reduce((m, a) => Math.max(m, a.id), 0) + 1;
 }
 
-function handler(req, res) {
+async function handler(req, res) {
   if (req.method === 'GET') {
-    if (req.method === 'GET') {
-  return res.status(200).json({ customers, supportsPost: true });
-}
-
-    return res.status(200).json({ customers });
+    // tiny debug flag so we can confirm new code is live in production
+    return res.status(200).json({ customers, supportsPost: true });
   }
 
   if (req.method === 'POST') {
+    // Minimal create: name + type required; optional phone/email/addresses
     const { type, name, phone = '', email = '', notes = '', addresses = [] } = req.body || {};
-    if (!type || !name) return res.status(400).json({ error: 'type and name are required' });
+    if (!type || !name) {
+      return res.status(400).json({ error: 'type and name are required' });
+    }
 
     const preparedAddresses = (addresses || []).map(a => ({
       id: nextAddressId(),
@@ -84,4 +84,3 @@ function handler(req, res) {
 }
 
 export default withCors(handler);
-export { customers, nextAddressId };
