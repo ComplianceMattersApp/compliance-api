@@ -1,5 +1,7 @@
 import { withCors } from '../../lib/cors';
 
+const BUILD_TAG = 'r7-customers'; // <-- bump this if we redeploy again
+
 // --- in-memory mock data (module scope so it persists across calls) ---
 let customers = [
   {
@@ -43,16 +45,23 @@ function nextAddressId() {
 }
 
 async function handler(req, res) {
+  // add a debug header so we can see which build is responding
+  res.setHeader('X-Build-Tag', BUILD_TAG);
+
   if (req.method === 'GET') {
-    // tiny debug flag so we can confirm new code is live in production
-    return res.status(200).json({ customers, supportsPost: true });
+    // include debug fields so you can confirm the live code
+    return res.status(200).json({
+      customers,
+      supportsPost: true,
+      build: BUILD_TAG,
+      sawMethod: req.method
+    });
   }
 
   if (req.method === 'POST') {
-    // Minimal create: name + type required; optional phone/email/addresses
     const { type, name, phone = '', email = '', notes = '', addresses = [] } = req.body || {};
     if (!type || !name) {
-      return res.status(400).json({ error: 'type and name are required' });
+      return res.status(400).json({ error: 'type and name are required', build: BUILD_TAG, sawMethod: req.method });
     }
 
     const preparedAddresses = (addresses || []).map(a => ({
@@ -77,10 +86,11 @@ async function handler(req, res) {
     };
 
     customers.push(newCustomer);
-    return res.status(201).json({ customer: newCustomer });
+    return res.status(201).json({ customer: newCustomer, build: BUILD_TAG, sawMethod: req.method });
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  // fallthrough: anything else
+  return res.status(405).json({ error: 'Method not allowed', build: BUILD_TAG, sawMethod: req.method });
 }
 
 export default withCors(handler);
